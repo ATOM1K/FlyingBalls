@@ -21,57 +21,62 @@ type
     Timer1: TTimer;
     Ball1ColorBox: TColorBox;
     Ball2ColorBox: TColorBox;
-    procedure FormActivate(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
     procedure Ball1ColorBoxSelect(Sender: TObject);
     procedure Ball2ColorBoxSelect(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
   public
-    { Public declarations }
+
   end;
-  TBall = class                   //класс м€ча
-      Name: string;
+      MainController = class
+
+    end;
+  TBall = class                   //ball class
       CollCount: integer;
       CollPos1: string;
       CollPos2: string;
-      VelocityR: integer;
-      VelocityD: integer;
+      VelocityH: integer;
+      VelocityV: integer;
   end;
-  TSpace = class                   //класс рамки
-      Name: string;
+  TSpace = class                   //area class
       LeftStart: integer;
       RightEnd: integer;
       TopStart: integer;
       Down: integer;
   end;
-  function ColBool(Ball:TShape; BallArea:TSpace) : boolean;
+  procedure Collision(Ball: TShape; BallArea: TSpace; BallObj: TBall; BallCC: TLabel; BallLog: TListBox);
 var
   BallAppFrame: TBallAppFrame;
-  B1, B2 : TBall;      //объ€влл€ем объекты м€чей
-  S1, S2 : TSpace;     //объ€влл€ем объекты рамок
-  i: integer;
+  B1, B2 : TBall;      //declaring ball objects
+  S1, S2 : TSpace;     //declaring area objects
 
 implementation
 
 {$R *.dfm}
-//ƒвижение м€чей - отправл€ем объекты в процедуру, избегаем дублировани€(SMELL)
-procedure BallMove(Ball: TShape; BallSpeed: TSpinEdit; BallArea: TSpace; BallObj: TBall);
+//Ball movement
+procedure BallMove(Ball: TShape; BallSpeed: TSpinEdit; BallArea: TSpace; BallObj: TBall; BallCC: TLabel; BallLog: TListBox);
 begin
-if (Ball.Top<=BallArea.TopStart) or (Ball.Top>=BallArea.Down) then BallObj.VelocityD:=BallObj.VelocityD*(-1);
-if (Ball.Left<=BallArea.LeftStart) or (Ball.Left>=BallArea.RightEnd) then BallObj.VelocityR:=BallObj.VelocityR*(-1);
-Ball.Top := Ball.Top + BallSpeed.Value * BallObj.VelocityD;
-Ball.Left := Ball.Left + BallSpeed.Value * BallObj.VelocityR;
+if (Ball.Top<=BallArea.TopStart) or (Ball.Top>=BallArea.Down) then
+begin
+BallObj.VelocityV:=BallObj.VelocityV*(-1);
+Collision(Ball, BallArea, BallObj, BallCC, BallLog);
+end;
+if (Ball.Left<=BallArea.LeftStart) or (Ball.Left>=BallArea.RightEnd) then
+begin
+BallObj.VelocityH:=BallObj.VelocityH*(-1);
+Collision(Ball, BallArea, BallObj, BallCC, BallLog);
 end;
 
-//считаем количество столкновений со стенкой
-procedure CollisionCheck(Ball: TShape; BallArea: TSpace; BallObj: TBall; BallLable: TLabel; BallLog: TListBox);
-begin
-if ColBool(Ball, BallArea) then
+Ball.Top := Ball.Top + BallSpeed.Value * BallObj.VelocityV;
+Ball.Left := Ball.Left + BallSpeed.Value * BallObj.VelocityH;
+end;
+
+procedure Collision(Ball: TShape; BallArea: TSpace; BallObj: TBall; BallCC: TLabel; BallLog: TListBox);
 begin
 BallObj.CollCount:=BallObj.CollCount+1;
 BallObj.CollPos1:=BallObj.CollPos2;
-
 if (Ball.Top<=BallArea.TopStart) then
 begin
 if Ball.Left>((BallArea.RightEnd-BallArea.LeftStart)/2 + BallArea.LeftStart) then
@@ -103,61 +108,55 @@ BallObj.CollPos2:='Right Bottom'
 else
 BallObj.CollPos2:='Right Top';
 end;
-BallLable.Caption:='Ball #1 : ' + IntToStr(B1.CollCount) + ' collisions, Ball#2: '+ IntToStr(B2.CollCount) +' collisions';
+BallCC.Caption:='Ball #1 : ' + IntToStr(B1.CollCount) + ' collisions, Ball#2: '+ IntToStr(B2.CollCount) +' collisions';
 BallLog.Items.Add(TimeToStr(now)+' '+BallObj.CollPos1+ ' -> '+BallObj.CollPos2);
-end;
+
+BallLog.Perform(WM_VSCROLL, SB_BOTTOM, 0);
+BallLog.Perform( WM_VSCROLL, SB_ENDSCROLL, 0 );
 end;
 
-//ѕровер€ем пересечение границы
-function ColBool(Ball:TShape; BallArea:TSpace) : boolean;
+//Filling in the fields of instances of the ball movement space class
+procedure SpaceCoord(Ball:TShape; Area:TSpace; BallArea: TBevel);
 begin
-  result := (Ball.Top<=BallArea.TopStart) or (Ball.Top>=BallArea.Down) or (Ball.Left<=BallArea.LeftStart) or (Ball.Left>=BallArea.RightEnd);
-end;
-//«аполн€ем пол€ экземпл€ров класса пространства перемещени€ м€ча
-procedure SpaceCoord(Ball:TShape; Area:TSpace; BallArea: TBevel); //ƒвижение м€чей - отправл€ем объекты в процедуру, избегаем дублировани€(SMELL)
-begin
- Area.Name:=Ball.Name+'Area';
  Area.LeftStart := BallArea.Left;
  Area.RightEnd := BallArea.Left+BallArea.Width - Ball.Width;
  Area.TopStart := BallArea.Top;
  Area.Down := BallArea.Top+BallArea.Height - Ball.Height;
 end;
-//“аймер каунтит каждую 0,1 секунды и генерирует событи€.
+//The timer counts every 0.1 seconds and generates events.
 procedure TBallAppFrame.Timer1Timer(Sender: TObject);
 begin
-BallMove(Ball1, Ball1Speed, S1, B1); //двигаем м€ч
-BallMove(Ball2, Ball2Speed, S2, B2); //двигаем м€ч
-CollisionCheck(Ball1, S1, B1, BallColCounter, Ball1Log);//провер€ем на столкновение
-CollisionCheck(Ball2, S2, B2, BallColCounter, Ball2Log);//провер€ем на столкновение
+BallMove(Ball1, Ball1Speed, S1, B1, BallColCounter, Ball1Log);
+BallMove(Ball2, Ball2Speed, S2, B2, BallColCounter, Ball2Log);
 end;
-//просто перекраска є1
-procedure TBallAppFrame.Ball1ColorBoxSelect(Sender: TObject);//при выборе другого цвета - мен€етс€ цвет шарика є1
+//repaint є1
+procedure TBallAppFrame.Ball1ColorBoxSelect(Sender: TObject);
 begin
 Ball1.Brush.Color := Ball1ColorBox.Selected;
 end;
-//просто перекраска є2
+//repaint є2
 procedure TBallAppFrame.Ball2ColorBoxSelect(Sender: TObject);
 begin
 Ball2.Brush.Color := Ball2ColorBox.Selected;
 end;
-//«аполнение полей м€чика
-procedure BallLoad (b: TBall; ball: TShape);
+//Filling in the fields of the ball
+procedure BallLoad (b: TBall);
 begin
-b.Name:=ball.StyleName;
 b.CollCount:=0;
-b.VelocityR:=1;
-b.VelocityD:=1;
+b.VelocityH:=1;
+b.VelocityV:=1;
 end;
-//—ама€ главна€ стартова€ процедура - инициализаци€ всего что нужно при запуске проги
-procedure TBallAppFrame.FormActivate(Sender: TObject);
+//The most important starting procedure is to launch everything that is needed when a program is detected
+procedure TBallAppFrame.FormCreate(Sender: TObject);
 begin
-B1 := TBall.Create;      //создаЄм объекты
-B2 := TBall.Create;      //создаЄм объекты
-S1 := TSpace.Create;     //создаЄм объекты, но пока не €сна их нужность
-S2 := TSpace.Create;     //создаЄм объекты, но пока не €сна их нужность
-BallLoad(B1, Ball1);
-BallLoad(B2, Ball2);
+B1 := TBall.Create;      //Create Objects
+B2 := TBall.Create;      //Create Objects
+S1 := TSpace.Create;     //Create Objects
+S2 := TSpace.Create;     //Create Objects
+BallLoad(B1);
+BallLoad(B2);
 SpaceCoord(Ball1, S1, Ball1Area);
 SpaceCoord(Ball2, S2, Ball2Area);
 end;
+
 end.

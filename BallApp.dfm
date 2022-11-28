@@ -10,7 +10,7 @@ object BallAppFrame: TBallAppFrame
   Font.Height = -12
   Font.Name = 'Segoe UI'
   Font.Style = []
-  OnActivate = FormActivate
+  OnCreate = FormCreate
   TextHeight = 15
   object Ball1Area: TBevel
     Left = 24
@@ -60,6 +60,7 @@ object BallAppFrame: TBallAppFrame
     Top = 408
     Width = 345
     Height = 175
+    DragMode = dmAutomatic
     ItemHeight = 15
     TabOrder = 1
   end
@@ -68,6 +69,7 @@ object BallAppFrame: TBallAppFrame
     Top = 408
     Width = 345
     Height = 175
+    DragMode = dmAutomatic
     ItemHeight = 15
     TabOrder = 0
   end
@@ -126,7 +128,7 @@ object BallAppFrame: TBallAppFrame
   object Timer1: TTimer
     Interval = 50
     OnTimer = Timer1Timer
-    Left = 382
-    Top = 6
+    Left = 396
+    Top = 8
   end
 end
