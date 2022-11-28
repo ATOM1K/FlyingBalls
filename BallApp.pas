@@ -58,14 +58,14 @@ implementation
 //Ball movement
 procedure BallMove(Ball: TShape; BallSpeed: TSpinEdit; BallArea: TSpace; BallObj: TBall; BallCC: TLabel; BallLog: TListBox);
 begin
-if (Ball.Top<=BallArea.TopStart) or (Ball.Top>=BallArea.Down) then
+if (Ball.Top <= BallArea.TopStart) or (Ball.Top >= BallArea.Down) then
 begin
-BallObj.VelocityV:=BallObj.VelocityV*(-1);
+BallObj.VelocityV := BallObj.VelocityV * (-1);
 Collision(Ball, BallArea, BallObj, BallCC, BallLog);
 end;
-if (Ball.Left<=BallArea.LeftStart) or (Ball.Left>=BallArea.RightEnd) then
+if (Ball.Left <= BallArea.LeftStart) or (Ball.Left >= BallArea.RightEnd) then
 begin
-BallObj.VelocityH:=BallObj.VelocityH*(-1);
+BallObj.VelocityH := BallObj.VelocityH * (-1);
 Collision(Ball, BallArea, BallObj, BallCC, BallLog);
 end;
 
@@ -75,41 +75,41 @@ end;
 
 procedure Collision(Ball: TShape; BallArea: TSpace; BallObj: TBall; BallCC: TLabel; BallLog: TListBox);
 begin
-BallObj.CollCount:=BallObj.CollCount+1;
-BallObj.CollPos1:=BallObj.CollPos2;
-if (Ball.Top<=BallArea.TopStart) then
+BallObj.CollCount := BallObj.CollCount + 1;
+BallObj.CollPos1 := BallObj.CollPos2;
+if (Ball.Top <= BallArea.TopStart) then
 begin
-if Ball.Left>((BallArea.RightEnd-BallArea.LeftStart)/2 + BallArea.LeftStart) then
-BallObj.CollPos2:='Top Right'
+if Ball.Left > ( (BallArea.RightEnd-BallArea.LeftStart) / 2 + BallArea.LeftStart) then
+BallObj.CollPos2 := 'Top Right'
 else
-BallObj.CollPos2:='Top Left';
+BallObj.CollPos2 := 'Top Left';
 end;
 
-if (Ball.Top>=BallArea.Down) then
+if (Ball.Top >= BallArea.Down) then
 begin
-if Ball.Left>((BallArea.RightEnd-BallArea.LeftStart)/2 + BallArea.LeftStart) then
-BallObj.CollPos2:='Down Right'
+if Ball.Left > ( (BallArea.RightEnd-BallArea.LeftStart) / 2 + BallArea.LeftStart) then
+BallObj.CollPos2 := 'Down Right'
 else
-BallObj.CollPos2:='Down Left';
+BallObj.CollPos2 := 'Down Left';
 end;
 
-if (Ball.Left<=BallArea.LeftStart) then
+if (Ball.Left <= BallArea.LeftStart) then
 begin
-if Ball.Top>((BallArea.Down-BallArea.TopStart)/2 + BallArea.TopStart) then
-BallObj.CollPos2:='Left Bottom'
+if Ball.Top > ( (BallArea.Down-BallArea.TopStart) / 2 + BallArea.TopStart) then
+BallObj.CollPos2 := 'Left Bottom'
 else
-BallObj.CollPos2:='Left Top';
+BallObj.CollPos2 := 'Left Top';
 end;
 
-if (Ball.Left>=BallArea.RightEnd) then
+if (Ball.Left >= BallArea.RightEnd) then
 begin
-if Ball.Top>((BallArea.Down-BallArea.TopStart)/2 + BallArea.TopStart) then
-BallObj.CollPos2:='Right Bottom'
+if Ball.Top > ( (BallArea.Down - BallArea.TopStart) / 2 + BallArea.TopStart) then
+BallObj.CollPos2 := 'Right Bottom'
 else
-BallObj.CollPos2:='Right Top';
+BallObj.CollPos2 := 'Right Top';
 end;
-BallCC.Caption:='Ball #1 : ' + IntToStr(B1.CollCount) + ' collisions, Ball#2: '+ IntToStr(B2.CollCount) +' collisions';
-BallLog.Items.Add(TimeToStr(now)+' '+BallObj.CollPos1+ ' -> '+BallObj.CollPos2);
+BallCC.Caption := 'Ball #1 : ' + IntToStr(B1.CollCount) + ' collisions, Ball#2: '+ IntToStr(B2.CollCount) +' collisions';
+BallLog.Items.Add(TimeToStr(now) + ' ' + BallObj.CollPos1 + ' -> ' + BallObj.CollPos2);
 
 BallLog.Perform(WM_VSCROLL, SB_BOTTOM, 0);
 BallLog.Perform( WM_VSCROLL, SB_ENDSCROLL, 0 );
@@ -119,9 +119,9 @@ end;
 procedure SpaceCoord(Ball:TShape; Area:TSpace; BallArea: TBevel);
 begin
  Area.LeftStart := BallArea.Left;
- Area.RightEnd := BallArea.Left+BallArea.Width - Ball.Width;
+ Area.RightEnd := BallArea.Left + BallArea.Width - Ball.Width;
  Area.TopStart := BallArea.Top;
- Area.Down := BallArea.Top+BallArea.Height - Ball.Height;
+ Area.Down := BallArea.Top + BallArea.Height - Ball.Height;
 end;
 //The timer counts every 0.1 seconds and generates events.
 procedure TBallAppFrame.Timer1Timer(Sender: TObject);
@@ -142,9 +142,9 @@ end;
 //Filling in the fields of the ball
 procedure BallLoad (b: TBall);
 begin
-b.CollCount:=0;
-b.VelocityH:=1;
-b.VelocityV:=1;
+b.CollCount := 0;
+b.VelocityH := 1;
+b.VelocityV := 1;
 end;
 //The most important starting procedure is to launch everything that is needed when a program is detected
 procedure TBallAppFrame.FormCreate(Sender: TObject);
