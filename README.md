@@ -1,2 +1,2 @@
 # FlyingBalls
- For new jub, fun and experience
+ For new job, fun and experience
